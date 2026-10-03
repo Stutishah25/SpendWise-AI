@@ -1,0 +1,17 @@
+# Local PostgreSQL only (Phase 1). NOTE: not executed in the authoring sandbox (no Docker there);
+# the schema was validated against a native PostgreSQL 16 server instead.
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-spendwise}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-spendwise}
+    ports: ["5432:5432"]
+    volumes: ["spendwise_pg:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-spendwise}"]
+      interval: 5s
+      retries: 10
+volumes:
+  spendwise_pg:

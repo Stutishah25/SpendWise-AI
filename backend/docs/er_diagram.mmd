@@ -1,0 +1,232 @@
+erDiagram
+    ai_analyses {
+        uuid id PK
+        uuid user_id FK
+        uuid scenario_run_id FK
+        uuid comparison_id FK
+        uuid investment_simulation_run_id FK
+    }
+    audit_log {
+        bigint id PK
+        uuid user_id FK
+    }
+    auth_tokens {
+        uuid id PK
+        uuid user_id FK
+        char_64 token_hash UK
+    }
+    budgets {
+        uuid id PK
+        uuid user_id FK
+        uuid category_id FK
+        txn_kind category_kind FK
+        char_3 currency FK
+    }
+    categories {
+        uuid id PK
+        uuid user_id FK
+    }
+    currencies {
+        char_3 code PK
+    }
+    financial_projection_points {
+        uuid projection_id PK, FK
+        smallint month_index PK
+        uuid user_id FK
+    }
+    financial_projections {
+        uuid id PK
+        uuid user_id FK
+        uuid snapshot_id FK
+        char_3 currency FK
+    }
+    financial_snapshots {
+        uuid id PK
+        uuid user_id FK
+        char_3 currency FK
+    }
+    goal_contributions {
+        uuid id PK
+        uuid goal_id FK
+        uuid user_id FK
+        char_3 currency FK
+    }
+    goal_progress_snapshots {
+        uuid id PK
+        uuid goal_id FK
+        uuid user_id FK
+        char_3 currency FK
+    }
+    goals {
+        uuid id PK
+        uuid user_id FK
+        char_3 currency FK
+    }
+    investment_simulation_runs {
+        uuid id PK
+        uuid user_id FK
+        uuid simulation_id FK
+        char_3 currency FK
+    }
+    investment_simulations {
+        uuid id PK
+        uuid user_id FK
+        char_3 currency FK
+    }
+    loan_payments {
+        uuid id PK
+        uuid loan_id FK
+        uuid user_id FK
+        char_3 currency FK
+        uuid transaction_id FK
+    }
+    loan_schedule_items {
+        uuid schedule_id PK, FK
+        integer installment_number PK
+        uuid user_id FK
+    }
+    loan_schedules {
+        uuid id PK
+        uuid loan_id FK
+        uuid user_id FK
+        char_3 currency FK
+    }
+    loans {
+        uuid id PK
+        uuid user_id FK
+        char_3 currency FK
+    }
+    notification_deliveries {
+        uuid id PK
+        uuid notification_id FK
+        uuid user_id FK
+    }
+    notification_preferences {
+        uuid user_id PK, FK
+        notification_type notification_type PK
+    }
+    notifications {
+        uuid id PK
+        uuid user_id FK
+        uuid goal_id FK
+        uuid loan_id FK
+        uuid budget_id FK
+    }
+    recurring_rules {
+        uuid id PK
+        uuid user_id FK
+        uuid category_id FK
+        txn_kind kind FK
+        char_3 currency FK
+    }
+    refresh_tokens {
+        uuid id PK
+        uuid user_id FK
+        char_64 token_hash UK
+        uuid replaced_by_id FK
+    }
+    scenario_comparison_items {
+        uuid comparison_id PK, FK
+        smallint position PK
+        uuid user_id FK
+        char_3 currency FK
+        uuid snapshot_id FK
+        integer horizon_months FK
+        uuid scenario_run_id FK
+    }
+    scenario_comparisons {
+        uuid id PK
+        uuid user_id FK
+        uuid snapshot_id FK
+        char_3 currency FK
+    }
+    scenario_runs {
+        uuid id PK
+        uuid user_id FK
+        uuid scenario_id FK
+        uuid snapshot_id FK
+        char_3 currency FK
+        scenario_type scenario_type FK
+        uuid baseline_projection_id FK
+        uuid scenario_projection_id FK
+    }
+    scenarios {
+        uuid id PK
+        uuid user_id FK
+        char_3 currency FK
+    }
+    transactions {
+        uuid id PK
+        uuid user_id FK
+        uuid category_id FK
+        txn_kind kind FK
+        char_3 currency FK
+        uuid recurring_rule_id FK
+    }
+    user_preferences {
+        uuid user_id PK, FK
+        char_3 base_currency FK
+    }
+    user_profiles {
+        uuid user_id PK, FK
+    }
+    users {
+        uuid id PK
+        citext email UK
+    }
+    scenario_comparisons |o--o{ ai_analyses : "comparison_id"
+    investment_simulation_runs |o--o{ ai_analyses : "investment_simulation_run_id"
+    scenario_runs |o--o{ ai_analyses : "scenario_run_id"
+    users ||--o{ ai_analyses : "user_id"
+    users ||--o{ audit_log : "user_id"
+    users ||--o{ auth_tokens : "user_id"
+    categories ||--o{ budgets : "category_id"
+    currencies ||--o{ budgets : "currency"
+    users ||--o{ budgets : "user_id"
+    users ||--o{ categories : "user_id"
+    financial_projections ||--o{ financial_projection_points : "projection_id"
+    financial_snapshots ||--o{ financial_projections : "snapshot_id"
+    currencies ||--o{ financial_snapshots : "currency"
+    users ||--o{ financial_snapshots : "user_id"
+    goals ||--o{ goal_contributions : "goal_id"
+    goals ||--o{ goal_progress_snapshots : "goal_id"
+    currencies ||--o{ goals : "currency"
+    users ||--o{ goals : "user_id"
+    investment_simulations ||--o{ investment_simulation_runs : "simulation_id"
+    currencies ||--o{ investment_simulations : "currency"
+    users ||--o{ investment_simulations : "user_id"
+    loans ||--o{ loan_payments : "loan_id"
+    transactions |o--o{ loan_payments : "transaction_id"
+    loan_schedules ||--o{ loan_schedule_items : "schedule_id"
+    loans ||--o{ loan_schedules : "loan_id"
+    currencies ||--o{ loans : "currency"
+    users ||--o{ loans : "user_id"
+    notifications ||--o{ notification_deliveries : "notification_id"
+    users ||--o{ notification_preferences : "user_id"
+    budgets |o--o{ notifications : "budget_id"
+    goals |o--o{ notifications : "goal_id"
+    loans |o--o{ notifications : "loan_id"
+    users ||--o{ notifications : "user_id"
+    categories ||--o{ recurring_rules : "category_id"
+    currencies ||--o{ recurring_rules : "currency"
+    users ||--o{ recurring_rules : "user_id"
+    refresh_tokens |o--o{ refresh_tokens : "replaced_by_id"
+    users ||--o{ refresh_tokens : "user_id"
+    scenario_comparisons ||--o{ scenario_comparison_items : "comparison_id"
+    scenario_runs ||--o{ scenario_comparison_items : "scenario_run_id"
+    currencies ||--o{ scenario_comparisons : "currency"
+    financial_snapshots ||--o{ scenario_comparisons : "snapshot_id"
+    users ||--o{ scenario_comparisons : "user_id"
+    financial_projections ||--o{ scenario_runs : "baseline_projection_id"
+    scenarios ||--o{ scenario_runs : "scenario_id"
+    financial_projections ||--o{ scenario_runs : "scenario_projection_id"
+    financial_snapshots ||--o{ scenario_runs : "snapshot_id"
+    currencies ||--o{ scenarios : "currency"
+    users ||--o{ scenarios : "user_id"
+    categories ||--o{ transactions : "category_id"
+    currencies ||--o{ transactions : "currency"
+    recurring_rules |o--o{ transactions : "recurring_rule_id"
+    users ||--o{ transactions : "user_id"
+    currencies ||--o{ user_preferences : "base_currency"
+    users ||--o| user_preferences : "user_id"
+    users ||--o| user_profiles : "user_id"
