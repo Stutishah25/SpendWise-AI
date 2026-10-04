@@ -219,6 +219,18 @@ def seed(s: Session, today: dt.date | None = None) -> dict[str, int]:
     return {"users": 2}
 
 
+def set_seed_user_password(s: Session, email: str, raw_password: str) -> bool:
+    """Development-only: set an Argon2id password hash for a seeded account."""
+    from app.core.security import hash_password
+    user = s.scalar(select(User).where(User.email == email))
+    if not user:
+        return False
+    user.password_hash = hash_password(raw_password)
+    user.password_changed_at = dt.datetime.now(dt.timezone.utc)
+    s.flush()
+    return True
+
+
 def counts(s: Session) -> dict[str, int]:
     from app.models import Base
     return {t.name: s.scalar(select(func.count()).select_from(t)) for t in Base.metadata.sorted_tables}
@@ -227,9 +239,19 @@ def counts(s: Session) -> dict[str, int]:
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--reset", action="store_true", help="delete the demo users (cascades) and re-seed")
+    ap.add_argument("--set-password", nargs=2, metavar=("EMAIL", "PASSWORD"),
+                    help="dev-only: set an Argon2id password for a seeded user (e.g. --set-password demo@spendwise.test Pass1234!)")
     args = ap.parse_args()
     engine = make_engine()
     with Session(engine) as s:
+        if args.set_password:
+            email, pwd = args.set_password
+            if set_seed_user_password(s, email, pwd):
+                s.commit()
+                print(f"Password updated with Argon2id hash for {email}")
+            else:
+                print(f"User {email} not found")
+            return
         if args.reset:
             s.execute(delete(User).where(User.email.in_([DEMO_EMAIL, OTHER_EMAIL])))
             s.commit()

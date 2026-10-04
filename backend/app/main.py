@@ -1,10 +1,16 @@
+"""SpendWise AI API main application."""
+from __future__ import annotations
+
 from fastapi import Depends, FastAPI
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from app.api.auth import router as auth_router
 from app.db.dependencies import get_db
 
 app = FastAPI(title="SpendWise AI API")
+
+app.include_router(auth_router)
 
 
 @app.get("/")
